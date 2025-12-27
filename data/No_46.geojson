@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "No_46",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "No": "46", "Nama Desa": "KEBUN AGUNG", "Blok": "A", "Panjang": "732,16 M", "Lebar": "4 M", "Kondisi": "TANAH", "Klasifikasi Jalan": "JALAN LINGKUNGAN", "FOTO": "IMG_001.jpg" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 117.285394211430543, 0.615052758894717 ], [ 117.284948468334747, 0.615305493982131 ], [ 117.284685733055952, 0.615458987333834 ], [ 117.284241348749859, 0.615717465496301 ], [ 117.283929368905916, 0.615198392690313 ], [ 117.283655562318089, 0.614731155035588 ], [ 117.284918689605391, 0.613946058518057 ], [ 117.287088281408344, 0.61271927074535 ], [ 117.286969670580746, 0.612782933490835 ] ] ] } }
+]
+}

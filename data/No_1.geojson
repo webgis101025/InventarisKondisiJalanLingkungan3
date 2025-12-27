@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "No_1",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "No": "1", "Nama Desa": "TEPIAN MAKMUR", "Blok": "A", "Panjang": "1.048 M", "Lebar": "5 M", "Kondisi": "TANAH DAN SEMEN", "Klasifikasi Jalan": "JALAN LINGKUNGAN", "FOTO": "IMG_058.jpg" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 117.253633714429057, 0.690526393333126 ], [ 117.255746428312179, 0.690541273628717 ], [ 117.259771664249627, 0.690455359493274 ], [ 117.263005075516915, 0.69041194929351 ] ] ] } }
+]
+}

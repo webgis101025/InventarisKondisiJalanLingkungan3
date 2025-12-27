@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "No_66",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "No": "66", "Nama Desa": "MASALAP RAYA", "Blok": "E", "Panjang": "200.44 M", "Lebar": "4 M", "Kondisi": "TANAH DAN SEMEN", "Klasifikasi Jalan": "JALAN LINGKUNGAN", "FOTO": "IMG_030.jpg" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 117.289179656374344, 0.591293888119408 ], [ 117.289165796064424, 0.591000757944671 ], [ 117.28914725693231, 0.590608677588307 ], [ 117.289133511054359, 0.590317970359764 ], [ 117.28910482575408, 0.590173795871013 ], [ 117.28909104462241, 0.589776441489214 ], [ 117.289080956440358, 0.589485568469142 ] ] ] } }
+]
+}

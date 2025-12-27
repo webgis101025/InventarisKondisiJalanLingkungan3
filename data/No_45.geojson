@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "No_45",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "No": "45", "Nama Desa": "MARGO MULYO", "Blok": "F", "Panjang": "794.41 M", "Lebar": "5 M", "Kondisi": "TANAH DAN SEMEN", "Klasifikasi Jalan": "JALAN LINGKUNGAN", "FOTO": "IMG_025.jpg" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 117.291422673548936, 0.615725414909305 ], [ 117.292334931025479, 0.615712273358418 ], [ 117.293067265646073, 0.615696517927765 ], [ 117.293757212612846, 0.615682456293972 ], [ 117.29477815436033, 0.615659929340117 ], [ 117.295610962064302, 0.615645101271872 ], [ 117.296312192954986, 0.615633422367129 ], [ 117.297383502806994, 0.61561750168052 ], [ 117.298558341833953, 0.615608254569602 ] ] ] } }
+]
+}
