@@ -1,598 +1,578 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventaris Kondisi Jalan Lingkungan</title>
+<meta charset="UTF-8" />
+<title>Inventaris Kondisi Jalan Lingkungan</title>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <!-- Measure -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-measure/dist/leaflet-measure.css"/>
+<!-- Measure -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-measure/dist/leaflet-measure.css"/>
 
-  <!-- Search -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+<!-- Search (Geocoder) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
 
-  <style>
-    :root{
-      --nav:#0b3556;
-      --nav2:#08304d;
-      --bg:#f2f4f7;
-      --panel:#ffffff;
-      --panel2:#f7f9fc;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --border:#d6dde8;
-      --shadow: 0 10px 24px rgba(0,0,0,0.15);
-      --radius: 8px;
-      --accent:#2563eb;
-    }
+<style>
+  :root{
+    --topbar-h: 72px;
+    --sidebar-w: 330px;
+    --nav-bg: #0b3a57;   /* biru gelap */
+    --panel-bg: #f7f9fc;
+    --panel-border: #d7dee9;
+    --text: #1f2a37;
+    --muted: #6b7280;
+    --btn: #2563eb;
+    --btn-hover: #1d4ed8;
+  }
 
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); }
+  html, body{ height: 100%; margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--text); }
 
-    .app{ height:100vh; display:flex; flex-direction:column; }
+  /* Layout */
+  .app{
+    height: 100%;
+    display: grid;
+    grid-template-rows: var(--topbar-h) 1fr;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-areas:
+      "topbar topbar"
+      "sidebar mapwrap";
+  }
 
-    /* Header */
-    .header{
-      height:72px;
-      background: linear-gradient(0deg, var(--nav2), var(--nav));
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 0 16px;
-      box-shadow: var(--shadow);
-      z-index: 9999;
-    }
+  /* Topbar */
+  .topbar{
+    grid-area: topbar;
+    background: linear-gradient(180deg, #0b3a57 0%, #072c43 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    z-index: 9999;
+  }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      font-weight:700;
-      letter-spacing:.2px;
-      min-width: 320px;
-    }
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+  }
 
-    /* === Logo block (logo + caption) === */
-    .brand-left{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:4px;
-    }
-    .brand-logo{
-      height:34px;           /* atur ukuran logo */
-      width:auto;
-      display:block;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
-    }
-    .brand-caption{
-      font-size:12px;
-      font-weight:700;
-      opacity:.95;
-      letter-spacing:.4px;
-      text-transform:none;
-      line-height:1;
-    }
+  .brand img{
+    height: 38px;
+    width: auto;
+    display: block;
+  }
 
-    .brand-right{
-      display:flex;
-      flex-direction:column;
-      line-height:1.15;
-      margin-top:2px;
-    }
-    .brand-right .title{
-      font-size:16px;
-      font-weight:800;
-    }
-    .brand-right small{
-      font-weight:500;
-      opacity:.9;
-      font-size:12px;
-      margin-top:2px;
-    }
+  .brand .brand-text{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
 
-    .navlinks{
-      display:flex;
-      gap:16px;
-      font-size:13px;
-      opacity:.95;
-    }
-    .navlinks a{ color:#fff; text-decoration:none; }
-    .navlinks a:hover{ text-decoration:underline; }
+  .brand .brand-text .sub{
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+  }
 
-    .main{ flex:1; display:flex; min-height:0; }
+  .titlewrap{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    gap: 4px;
+  }
 
-    /* Sidebar */
-    .sidebar{
-      width:360px;
-      background:var(--panel);
-      border-right:1px solid var(--border);
-      padding:12px;
-      overflow:auto;
-    }
+  .titlewrap .title{
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
 
-    .tabs{
-      display:flex;
-      gap:6px;
-      border-bottom:1px solid var(--border);
-      margin-bottom:10px;
-    }
-    .tab{
-      padding:8px 10px;
-      border:1px solid var(--border);
-      border-bottom:none;
-      background:var(--panel2);
-      border-top-left-radius:6px;
-      border-top-right-radius:6px;
-      font-size:13px;
-      color:var(--muted);
-    }
-    .tab.active{
-      background:#fff;
-      color:var(--text);
-      font-weight:700;
-    }
+  /* CATATAN: "WebGIS Desa" DIHAPUS sesuai permintaan */
 
-    .section{
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      overflow:hidden;
-      margin-bottom:12px;
-      background:#fff;
-    }
-    .section .section-h{
-      background:var(--panel2);
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      font-weight:700;
-      font-size:13px;
-      color:var(--text);
-    }
-    .section .section-b{
-      padding:10px 12px;
-      font-size:13px;
-      color:var(--text);
-    }
-    .hint{ color:var(--muted); font-size:12px; line-height:1.4; }
+  /* Sidebar */
+  .sidebar{
+    grid-area: sidebar;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--panel-border);
+    overflow: auto;
+  }
 
-    .btnrow{ display:flex; gap:8px; margin-top:10px; }
-    .btn{
-      border:1px solid var(--border);
-      background:#fff;
-      padding:8px 10px;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:13px;
-    }
-    .btn.primary{
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#fff;
-    }
+  .panel{
+    margin: 14px;
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  }
 
-    .field{ margin-top:10px; }
-    .field label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-      font-weight:700;
-    }
-    .field input, .field select{
-      width:100%;
-      padding:8px 10px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      outline:none;
-      font-size:13px;
-      background:#fff;
-    }
-    .field input:focus, .field select:focus{
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
-    }
+  .panel-head{
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    font-weight: 700;
+    background: #fbfcff;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
 
-    .smallnote{ margin-top:8px; font-size:12px; color:var(--muted); }
+  .panel-body{
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text);
+  }
 
-    /* Map container */
-    .mapwrap{ flex:1; min-width:0; position:relative; }
-    #map{ position:absolute; inset:0; }
+  .panel-body ul{
+    padding-left: 18px;
+    margin: 8px 0 0;
+    color: var(--muted);
+  }
+  .panel-body li{ margin: 6px 0; }
 
-    /* Popup image */
-    .popup-img{
-      width: 100%;
-      max-width: 280px;
-      border-radius: 8px;
-      margin-top: 6px;
-      display: block;
-      border:1px solid rgba(0,0,0,0.08);
-    }
+  .btnrow{
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
 
-    /* Legend */
-    .legend{
-      background: #fff;
-      padding: 10px 12px;
-      font-size: 12px;
-      line-height: 18px;
-      border-radius: 8px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.25);
-      max-height: 260px;
-      overflow: auto;
-      border:1px solid rgba(0,0,0,0.12);
-    }
-    .legend i{
-      width: 28px;
-      height: 4px;
-      float: left;
-      margin: 7px 8px 0 0;
-      border-radius:999px;
-    }
+  .btn{
+    appearance: none;
+    border: none;
+    background: var(--btn);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s ease-in-out;
+    flex: 1;
+    text-align: center;
+  }
+  .btn:hover{ background: var(--btn-hover); }
 
-    /* Label desa (klik tembus) */
-    .desa-label{
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      color: #1f2937;
-      text-align: center;
-      white-space: nowrap;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.75);
-      border: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
-      pointer-events: none;
-    }
+  .btn.secondary{
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid var(--panel-border);
+  }
+  .btn.secondary:hover{ background: #f3f6fb; }
 
-    @media (max-width: 900px){ .sidebar{ width: 320px; } }
-    @media (max-width: 720px){
-      .sidebar{ display:none; }
-      .header{ height:64px; }
-      .brand{ min-width:auto; }
-      .brand-logo{ height:30px; }
+  .field{
+    margin-top: 12px;
+  }
+  .field label{
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .field input{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    outline: none;
+    font-size: 13px;
+  }
+  .hint{
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Summary */
+  .summary{
+    margin: 14px;
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  }
+  .summary .panel-head{ border-radius: 12px 12px 0 0; }
+  .summary .panel-body{ color: var(--muted); }
+  .summary .panel-body ul{ margin-top: 10px; }
+
+  /* Map */
+  .mapwrap{
+    grid-area: mapwrap;
+    position: relative;
+  }
+  #map{
+    height: calc(100vh - var(--topbar-h));
+    width: 100%;
+  }
+
+  /* Popup image */
+  .popup-img{
+    width: 100%;
+    max-width: 280px;
+    border-radius: 8px;
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* Legend */
+  .legend{
+    background: rgba(255,255,255,0.95);
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 18px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    max-height: 260px;
+    overflow: auto;
+  }
+  .legend i{
+    width: 28px;
+    height: 4px;
+    float: left;
+    margin: 7px 8px 0 0;
+    border-radius: 3px;
+  }
+
+  /* Label desa (klik tembus) */
+  .desa-label{
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow:
+      -1px -1px 0 #ffffff,
+       1px -1px 0 #ffffff,
+      -1px  1px 0 #ffffff,
+       1px  1px 0 #ffffff;
+    pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 980px){
+    :root{ --sidebar-w: 300px; }
+    .titlewrap .title{ font-size: 18px; }
+  }
+  @media (max-width: 820px){
+    .app{
+      grid-template-rows: var(--topbar-h) 1fr;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "topbar"
+        "mapwrap";
     }
-  </style>
+    .sidebar{ display: none; }
+    #map{ height: calc(100vh - var(--topbar-h)); }
+  }
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <!-- Header -->
-    <div class="header">
-      <div class="brand">
-        <!-- Logo + caption -->
-        <div class="brand-left">
-          <!-- GANTI PATH sesuai lokasi file kamu -->
-          <!-- contoh aman: assets/logo-itenas.png -->
-          <img class="brand-logo" src="assets/logo-itenas.png" alt="Logo Itenas"
-               onerror="this.style.display='none'">
-          <div class="brand-caption">Capstone Design</div>
-        </div>
+<div class="app">
 
-        <!-- Title -->
-        <div class="brand-right">
-          <div class="title">Inventaris Jalan Lingkungan</div>
-          <small>WebGIS Desa</small>
-        </div>
-      </div>
-
-      <div class="navlinks">
-        <a href="#" onclick="return false;">Help</a>
-        <a href="#" onclick="return false;">Feedback</a>
-        <a href="#" onclick="return false;">Login</a>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <!-- Pastikan file logo ada di repo: /assets/logo-itenas.png (atau ganti sesuai nama filemu) -->
+      <img src="assets/logo-itenas.png" alt="Itenas">
+      <div class="brand-text">
+        <div style="color:#fff; font-weight:800; letter-spacing:.2px;">itenas</div>
+        <div class="sub">Capstone Design</div>
       </div>
     </div>
 
-    <!-- Main -->
-    <div class="main">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="tabs">
-          <div class="tab active">Search Criteria</div>
-          <div class="tab">Data Sets</div>
-          <div class="tab">Additional</div>
-          <div class="tab">Results</div>
+    <div class="titlewrap">
+      <div class="title">Inventaris Jalan Lingkungan</div>
+      <!-- "WebGIS Desa" DIHILANGKAN -->
+    </div>
+
+    <!-- Help / Feedback / Login DIHILANGKAN -->
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Tab Data Sets / Additional / Results DIHILANGKAN -->
+    <div class="panel">
+      <div class="panel-head">Search Criteria</div>
+      <div class="panel-body">
+        Gunakan panel ini untuk membantu navigasi peta:
+        <ul>
+          <li><b>Home</b> untuk kembali ke tampilan awal</li>
+          <li><b>Search</b> untuk mencari lokasi</li>
+          <li><b>Measure</b> untuk mengukur jarak/luas</li>
+          <li>Klik garis jalan untuk melihat popup dan foto</li>
+        </ul>
+
+        <div class="btnrow">
+          <button class="btn" id="btnHome">Home View</button>
+          <!-- Zoom Data DIHILANGKAN -->
         </div>
 
-        <div class="section">
-          <div class="section-h">1. Enter Search Criteria</div>
-          <div class="section-b">
-            <div class="hint">
-              Gunakan panel ini untuk membantu navigasi peta:
-              <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
-                <li><b>Home</b> untuk kembali ke tampilan awal</li>
-                <li><b>Search</b> untuk mencari lokasi</li>
-                <li><b>Measure</b> untuk mengukur jarak/luas</li>
-                <li>Klik garis jalan untuk melihat <b>popup</b> dan <b>foto</b></li>
-              </ul>
-            </div>
-
-            <div class="btnrow">
-              <button class="btn primary" id="btnHome" type="button">Home View</button>
-              <button class="btn" id="btnZoomData" type="button">Zoom Data</button>
-            </div>
-
-            <div class="field">
-              <label>Koordinat pusat (Lat, Lon)</label>
-              <input id="coordInput" type="text" value="0.6226, 117.2870" />
-              <div class="smallnote">Format: <b>lat, lon</b> (contoh: 0.6226, 117.2870)</div>
-            </div>
-
-            <div class="field">
-              <label>Zoom</label>
-              <select id="zoomSelect">
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11" selected>11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-              </select>
-            </div>
-
-            <div class="btnrow">
-              <button class="btn" id="btnGo" type="button">Go</button>
-              <button class="btn" id="btnClear" type="button">Clear</button>
-            </div>
-          </div>
+        <div class="field">
+          <label>Koordinat pusat (Lat, Lon)</label>
+          <input id="centerBox" type="text" value="0.6226, 117.2870" />
+          <div class="hint">Format: lat, lon (contoh: 0.6226, 117.2870)</div>
         </div>
 
-        <div class="section">
-          <div class="section-h">Summary</div>
-          <div class="section-b">
-            <div class="hint">
-              Layer:
-              <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
-                <li>Garis jalan (No_1–No_72)</li>
-                <li>Batas desa (outline merah)</li>
-                <li>Label nama desa</li>
-                <li>Legenda blok (A–O)</li>
-              </ul>
-            </div>
-          </div>
+        <div class="field">
+          <label>Zoom</label>
+          <input id="zoomBox" type="number" min="1" max="20" value="11" />
         </div>
-      </aside>
 
-      <!-- Map -->
-      <div class="mapwrap">
-        <div id="map"></div>
+        <div class="btnrow">
+          <button class="btn secondary" id="btnGo">Go</button>
+          <button class="btn secondary" id="btnClear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="panel-head">Summary</div>
+      <div class="panel-body">
+        Layer:
+        <ul>
+          <li>Garis jalan (No_1–No_72)</li>
+          <li>Batas desa (outline merah)</li>
+          <li>Label nama desa</li>
+          <li>Legenda blok (A–O)</li>
+        </ul>
       </div>
     </div>
   </div>
 
-  <!-- JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-measure/dist/leaflet-measure.js"></script>
-  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <!-- MAP -->
+  <div class="mapwrap">
+    <div id="map"></div>
+  </div>
 
-  <script>
-    // 1) SETTING ZOOM AWAL
-    const INITIAL_CENTER = [0.6226, 117.2870];
-    const INITIAL_ZOOM = 11;
+</div>
 
-    const map = L.map("map", { preferCanvas: true }).setView(INITIAL_CENTER, INITIAL_ZOOM);
+<!-- JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-measure/dist/leaflet-measure.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-    // Basemap ESRI
-    const esriImagery = L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { maxZoom: 20 }
-    ).addTo(map);
+<script>
+// =====================================================
+// 1) SETTING ZOOM AWAL (FIX)
+// =====================================================
+const INITIAL_CENTER = [0.6226, 117.2870]; // N 00°37'21.3" E 117°17'16.9"
+const INITIAL_ZOOM = 11;
 
-    // OSM (opsional)
-    const osm = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { maxZoom: 20 }
-    );
+const map = L.map("map", { preferCanvas: true }).setView(INITIAL_CENTER, INITIAL_ZOOM);
 
-    L.control.layers(
-      { "ESRI Imagery": esriImagery, "OpenStreetMap": osm },
-      null,
-      { position: "topright", collapsed: true }
-    ).addTo(map);
+// Basemap ESRI
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 20 }
+).addTo(map);
 
-    // 2) PANE
-    map.createPane("batasPane");
-    map.getPane("batasPane").style.zIndex = 350;
+// =====================================================
+// 2) PANE (Z-INDEX) BIAR JALAN SELALU BISA DIKLIK
+// =====================================================
+map.createPane("batasPane");
+map.getPane("batasPane").style.zIndex = 350;
 
-    map.createPane("jalanPane");
-    map.getPane("jalanPane").style.zIndex = 450;
+map.createPane("jalanPane");
+map.getPane("jalanPane").style.zIndex = 450; // di atas batas
 
-    map.createPane("labelPane");
-    map.getPane("labelPane").style.zIndex = 500;
+map.createPane("labelPane");
+map.getPane("labelPane").style.zIndex = 500; // label di atas, tapi pointer-events none
 
-    // 3) WARNA BLOK
-    function warnaBlok(blok){
-      switch(blok){
-        case "A": return "#e41a1c";
-        case "B": return "#377eb8";
-        case "C": return "#4daf4a";
-        case "D": return "#ff7f00";
-        case "E": return "#984ea3";
-        case "F": return "#bbffcc";
-        case "G": return "#dd00ff";
-        case "H": return "#2e0e33";
-        case "I": return "#71e3f7";
-        case "J": return "#686323";
-        case "K": return "#eeff00";
-        case "L": return "#8f2f3f";
-        case "M": return "#4d4d4d";
-        case "N": return "#ffffff";
-        case "O": return "#000000";
-        default:  return "#ff0000";
-      }
-    }
+// =====================================================
+// 3) WARNA BLOK
+// =====================================================
+function warnaBlok(blok){
+  switch(blok){
+    case "A": return "#e41a1c";
+    case "B": return "#377eb8";
+    case "C": return "#4daf4a";
+    case "D": return "#ff7f00";
+    case "E": return "#984ea3";
+    case "F": return "#bbffcc";
+    case "G": return "#dd00ff";
+    case "H": return "#2e0e33";
+    case "I": return "#71e3f7";
+    case "J": return "#686323";
+    case "K": return "#eeff00";
+    case "L": return "#8f2f3f";
+    case "M": return "#4d4d4d";
+    case "N": return "#ffffff";
+    case "O": return "#000000";
+    default:  return "#ff0000";
+  }
+}
 
-    // 4) POPUP JALAN
-    function popupHTML(p){
-      const klas =
-        p["Klasifikasi Jalan"] ??
-        p.Klasifikasi_Jalan ??
-        p.KLASIFIKASI ??
-        "JALAN LINGKUNGAN";
+// =====================================================
+// 4) POPUP JALAN
+// =====================================================
+function popupHTML(p){
+  const klas =
+    p["Klasifikasi Jalan"] ??
+    p.Klasifikasi_Jalan ??
+    p.KLASIFIKASI ??
+    "JALAN LINGKUNGAN";
 
-      return `
-        <b>Informasi Jalan</b><br><br>
-        No : ${p.No ?? "-"}<br>
-        Nama Desa : ${p["Nama Desa"] ?? p.Nama_Desa ?? "-"}<br>
-        Blok : ${p.Blok ?? "-"}<br>
-        Panjang : ${p.Panjang ?? "-"}<br>
-        Lebar : ${p.Lebar ?? "-"}<br>
-        Kondisi : ${p.Kondisi ?? "-"}<br>
-        Klasifikasi Jalan : ${klas}<br>
-        <hr>
-        <b>Foto:</b><br>
-        <img src="FOTO/${p.FOTO ?? ""}" class="popup-img" onerror="this.style.display='none'">
-      `;
-    }
+  const foto = (p.FOTO ?? "").trim();
 
-    // 5) LOAD JALAN (No_1 – No_72)
-    for(let i=1;i<=72;i++){
-      fetch(`data/No_${i}.geojson`)
-        .then(r => r.json())
-        .then(data => {
-          L.geoJSON(data,{
-            pane: "jalanPane",
-            interactive: true,
-            style: f => ({
-              color: warnaBlok(f.properties?.Blok),
-              weight: 4
-            }),
-            onEachFeature:(f,l)=>{
-              l.bindPopup(popupHTML(f.properties || {}));
-            }
-          }).addTo(map);
-        })
-        .catch(() => {});
-    }
+  return `
+    <b>Informasi Jalan</b><br><br>
+    No : ${p.No ?? "-"}<br>
+    Nama Desa : ${p["Nama Desa"] ?? p.Nama_Desa ?? "-"}<br>
+    Blok : ${p.Blok ?? "-"}<br>
+    Panjang : ${p.Panjang ?? "-"}<br>
+    Lebar : ${p.Lebar ?? "-"}<br>
+    Kondisi : ${p.Kondisi ?? "-"}<br>
+    Klasifikasi Jalan : ${klas}<br>
+    <hr>
+    <b>Foto:</b><br>
+    <img src="FOTO/${foto}" class="popup-img" onerror="this.style.display='none'">
+  `;
+}
 
-    // 6) BATAS DESA OUTLINE MERAH + LABEL
-    function getNamaDesa(props){
-      return (
-        props["Nama Desa"] ||
-        props["NAMA_DESA"] ||
-        props["DESA"] ||
-        props["nama_desa"] ||
-        props["NAMOBJ"] ||
-        "Desa"
-      );
-    }
-
-    fetch("data/Batas_Desa.geojson")
-      .then(r => r.json())
-      .then(data => {
-        const batasLayer = L.geoJSON(data,{
-          pane: "batasPane",
-          interactive: false,
-          style:{ color:"#ff0000", weight:2, fill:false }
-        }).addTo(map);
-
-        batasLayer.eachLayer(layer => {
-          if(!layer.feature || !layer.feature.properties) return;
-
-          const nama = getNamaDesa(layer.feature.properties);
-          const center = layer.getBounds().getCenter();
-
-          const icon = L.divIcon({
-            className: "",
-            html: `<div class="desa-label">${nama}</div>`,
-            iconSize: [0, 0]
+// =====================================================
+// 5) LOAD JALAN (No_1 – No_72)
+// =====================================================
+for(let i=1;i<=72;i++){
+  fetch(`data/No_${i}.geojson`)
+    .then(r => r.json())
+    .then(data => {
+      L.geoJSON(data,{
+        pane: "jalanPane",
+        interactive: true,
+        style: f => ({
+          color: warnaBlok(f.properties?.Blok),
+          weight: 4
+        }),
+        onEachFeature:(f,l)=>{
+          l.on("click", () => {
+            l.bindPopup(popupHTML(f.properties || {})).openPopup();
           });
+        }
+      }).addTo(map);
+    })
+    .catch(() => {});
+}
 
-          L.marker(center, {
-            pane: "labelPane",
-            icon,
-            interactive: false,
-            keyboard: false
-          }).addTo(map);
-        });
-      })
-      .catch(() => {
-        console.warn("Batas_Desa.geojson tidak ditemukan. Pastikan file ada di folder data/");
-      });
+// =====================================================
+// 6) BATAS DESA OUTLINE MERAH + LABEL NAMA DESA
+// =====================================================
+function getNamaDesa(props){
+  return (
+    props["Nama Desa"] ||
+    props["NAMA_DESA"] ||
+    props["DESA"] ||
+    props["nama_desa"] ||
+    props["NAMOBJ"] ||
+    "Desa"
+  );
+}
 
-    // 7) MEASURE TOOL
-    L.control.measure({
-      position: "topleft",
-      primaryLengthUnit: "meters",
-      secondaryLengthUnit: "kilometers",
-      primaryAreaUnit: "sqmeters",
-      secondaryAreaUnit: "hectares"
-    }).addTo(map);
+fetch("data/Batas_Desa.geojson")
+  .then(r => r.json())
+  .then(data => {
 
-    // 8) SEARCH LOKASI
-    L.Control.geocoder({
-      position: "topright",
-      defaultMarkGeocode: true
-    }).addTo(map);
-
-    // 9) LEGENDA BLOK (GARIS)
-    const legend = L.control({position:"bottomright"});
-    legend.onAdd = function(){
-      const div = L.DomUtil.create("div","legend");
-      div.innerHTML += "<b>Legenda Blok</b><br>";
-
-      const blok = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"];
-      blok.forEach(b=>{
-        div.innerHTML += `<i style="background:${warnaBlok(b)}"></i> Blok ${b}<br>`;
-      });
-
-      L.DomEvent.disableClickPropagation(div);
-      L.DomEvent.disableScrollPropagation(div);
-      return div;
-    };
-    legend.addTo(map);
-
-    // UI sidebar
-    const btnHome = document.getElementById("btnHome");
-    const btnZoomData = document.getElementById("btnZoomData");
-    const btnGo = document.getElementById("btnGo");
-    const btnClear = document.getElementById("btnClear");
-    const coordInput = document.getElementById("coordInput");
-    const zoomSelect = document.getElementById("zoomSelect");
-
-    btnHome.addEventListener("click", () => {
-      map.setView(INITIAL_CENTER, INITIAL_ZOOM, { animate: true });
-      coordInput.value = `${INITIAL_CENTER[0]}, ${INITIAL_CENTER[1]}`;
-      zoomSelect.value = String(INITIAL_ZOOM);
-    });
-
-    btnGo.addEventListener("click", () => {
-      const raw = coordInput.value.trim();
-      const parts = raw.split(",").map(s => s.trim());
-      if(parts.length !== 2) return;
-
-      const lat = parseFloat(parts[0]);
-      const lon = parseFloat(parts[1]);
-      const z = parseInt(zoomSelect.value, 10);
-
-      if(Number.isFinite(lat) && Number.isFinite(lon) && Number.isFinite(z)){
-        map.setView([lat, lon], z, { animate: true });
+    const batasLayer = L.geoJSON(data,{
+      pane: "batasPane",
+      interactive: false,
+      style:{
+        color:"#ff0000",
+        weight:2,
+        fill:false
       }
+    }).addTo(map);
+
+    // Label per desa
+    batasLayer.eachLayer(layer => {
+      if(!layer.feature || !layer.feature.properties) return;
+
+      const nama = getNamaDesa(layer.feature.properties);
+      const center = layer.getBounds().getCenter();
+
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="desa-label">${nama}</div>`,
+        iconSize: [0, 0]
+      });
+
+      L.marker(center, {
+        pane: "labelPane",
+        icon,
+        interactive: false,
+        keyboard: false
+      }).addTo(map);
     });
 
-    btnClear.addEventListener("click", () => {
-      coordInput.value = "";
-      zoomSelect.value = String(INITIAL_ZOOM);
-    });
+  })
+  .catch(() => {
+    alert("Batas_Desa.geojson tidak ditemukan. Pastikan file ada di folder data/");
+  });
 
-    btnZoomData.addEventListener("click", () => {
-      fetch("data/Batas_Desa.geojson")
-        .then(r => r.json())
-        .then(gj => {
-          const tmp = L.geoJSON(gj);
-          const b = tmp.getBounds();
-          if(b && b.isValid()){
-            map.fitBounds(b, { padding:[20,20] });
-          }else{
-            map.setView(INITIAL_CENTER, INITIAL_ZOOM);
-          }
-        })
-        .catch(() => map.setView(INITIAL_CENTER, INITIAL_ZOOM));
-    });
-  </script>
+// =====================================================
+// 7) MEASURE TOOL
+// =====================================================
+L.control.measure({
+  primaryLengthUnit: "meters",
+  secondaryLengthUnit: "kilometers",
+  primaryAreaUnit: "sqmeters",
+  secondaryAreaUnit: "hectares"
+}).addTo(map);
+
+// =====================================================
+// 8) SEARCH LOKASI
+// =====================================================
+L.Control.geocoder({
+  defaultMarkGeocode: true
+}).addTo(map);
+
+// =====================================================
+// 9) LEGENDA BLOK (GARIS)
+// =====================================================
+const legend = L.control({position:"bottomright"});
+legend.onAdd = function(){
+  const div = L.DomUtil.create("div","legend");
+  div.innerHTML += "<b>Legenda Blok</b><br>";
+
+  const blok = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"];
+  blok.forEach(b=>{
+    div.innerHTML += `<i style="background:${warnaBlok(b)}"></i> Blok ${b}<br>`;
+  });
+
+  return div;
+};
+legend.addTo(map);
+
+// =====================================================
+// 10) SIDEBAR BUTTONS (Home/Go/Clear)
+// =====================================================
+const btnHome = document.getElementById("btnHome");
+const btnGo = document.getElementById("btnGo");
+const btnClear = document.getElementById("btnClear");
+const centerBox = document.getElementById("centerBox");
+const zoomBox = document.getElementById("zoomBox");
+
+btnHome?.addEventListener("click", () => {
+  map.setView(INITIAL_CENTER, INITIAL_ZOOM);
+});
+
+btnGo?.addEventListener("click", () => {
+  const raw = (centerBox.value || "").trim();
+  const z = parseInt(zoomBox.value || INITIAL_ZOOM, 10);
+
+  const parts = raw.split(",").map(s => s.trim());
+  if(parts.length !== 2) return;
+
+  const lat = parseFloat(parts[0]);
+  const lon = parseFloat(parts[1]);
+  if(Number.isFinite(lat) && Number.isFinite(lon)){
+    map.setView([lat, lon], Number.isFinite(z) ? z : INITIAL_ZOOM);
+  }
+});
+
+btnClear?.addEventListener("click", () => {
+  centerBox.value = `${INITIAL_CENTER[0]}, ${INITIAL_CENTER[1]}`;
+  zoomBox.value = `${INITIAL_ZOOM}`;
+});
+</script>
 </body>
 </html>
