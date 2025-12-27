@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Beranda | Inventaris Kondisi Jalan Lingkungan</title>
+
+  <style>
+    :root{
+      --nav-bg: #0b3a57;
+      --nav-bg2:#072c43;
+      --panel:#ffffff;
+      --muted:#dbeafe;
+      --text:#0f172a;
+      --sub:#475569;
+      --border:#d7dee9;
+      --shadow: 0 12px 26px rgba(0,0,0,.16);
+      --btn:#2563eb;
+      --btn2:#0ea5e9;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; color:var(--text); }
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(37,99,235,.18), transparent 55%),
+        radial-gradient(900px 600px at 85% 15%, rgba(14,165,233,.18), transparent 55%),
+        linear-gradient(180deg, #f8fafc, #eef2ff);
+    }
+
+    /* ===== Topbar ===== */
+    .topbar{
+      height:72px;
+      background:linear-gradient(180deg,var(--nav-bg),var(--nav-bg2));
+      display:flex;
+      align-items:center;
+      padding:0 24px;
+      gap:22px;
+      box-shadow:0 4px 16px rgba(0,0,0,.25);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 260px;
+    }
+    .brand img{ height:40px; }
+    .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+    .brand-text .campus{ color:#fff; font-weight:800; font-size:18px; letter-spacing:.5px; }
+    .brand-text .caption{ color:var(--muted); font-size:12px; }
+    .title{
+      color:#fff;
+      font-weight:800;
+      font-size:20px;
+      letter-spacing:.3px;
+    }
+    .spacer{ flex:1; }
+    .chip{
+      color:#eaf2ff;
+      border:1px solid rgba(255,255,255,.25);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,.08);
+    }
+
+    /* ===== Layout ===== */
+    .wrap{
+      max-width:1100px;
+      margin:22px auto 40px;
+      padding:0 18px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-body{ padding:18px 18px 16px; }
+    .h1{
+      margin:0 0 8px;
+      font-size:28px;
+      line-height:1.2;
+      letter-spacing:.2px;
+    }
+    .p{
+      margin:0 0 14px;
+      color:var(--sub);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    .info{
+      background: #f8fafc;
+      border:1px dashed #cbd5e1;
+      border-radius:14px;
+      padding:12px 12px;
+    }
+    .info b{ display:block; margin-bottom:6px; }
+    .info small{ color:#64748b; line-height:1.5; display:block; }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      box-shadow: 0 10px 18px rgba(37,99,235,.18);
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); filter:brightness(1.02); }
+    .btn.primary{ background:var(--btn); color:#fff; }
+    .btn.secondary{ background:var(--btn2); color:#082f49; box-shadow:0 10px 18px rgba(14,165,233,.18); }
+    .btn.ghost{ background:#fff; color:#0f172a; border:1px solid var(--border); box-shadow:none; }
+
+    .icon{
+      width:28px; height:28px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .btn.ghost .icon{ background:#f1f5f9; border-color:#e2e8f0; }
+
+    /* Right card */
+    .side{
+      background: linear-gradient(180deg, rgba(11,58,87,.98), rgba(7,44,67,.98));
+      color:#fff;
+      position:relative;
+    }
+    .side .card-body{ padding:18px; }
+    .side h3{ margin:0 0 10px; font-size:16px; letter-spacing:.2px; }
+    .side ul{ margin:0; padding-left:18px; color:#dbeafe; line-height:1.7; font-size:13px; }
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      margin-top:12px;
+      color:#eaf2ff;
+    }
+
+    /* Footer */
+    .footer{
+      margin-top:18px;
+      color:#64748b;
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:0 6px;
+    }
+
+    @media (max-width: 920px){
+      .hero{ grid-template-columns: 1fr; }
+      .brand{ min-width:unset; }
+      .title{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <!-- Pastikan file logo ada: assets/logo-itenas.png -->
+      <img src="assets/logo-itenas.png" alt="Itenas">
+      <div class="brand-text">
+        <div class="campus">itenas</div>
+        <div class="caption">Capstone Design</div>
+      </div>
+    </div>
+
+    <div class="title">Inventaris Kondisi Jalan Lingkungan</div>
+    <div class="spacer"></div>
+    <div class="chip">WebGIS • Leaflet • GeoJSON</div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <!-- MAIN -->
+      <div class="card">
+        <div class="card-body">
+          <h1 class="h1">Selamat Datang</h1>
+          <p class="p">
+            Halaman ini adalah pintu masuk menuju WebGIS inventarisasi jalan lingkungan.
+            Gunakan menu di bawah untuk membuka peta, melakukan pencarian lokasi, pengukuran jarak/luas,
+            dan melihat detail kondisi jalan beserta dokumentasi foto.
+          </p>
+
+          <div class="grid2">
+            <div class="info">
+              <b>Data Utama</b>
+              <small>
+                • Garis jalan (No_1 – No_72)<br>
+                • Batas desa (outline merah)<br>
+                • Label nama desa<br>
+                • Legenda blok (A–O)
+              </small>
+            </div>
+            <div class="info">
+              <b>Fitur</b>
+              <small>
+                • Popup detail jalan & foto<br>
+                • Measure (jarak/luas)<br>
+                • Search lokasi (geocoder)<br>
+                • Zoom awal terarah
+              </small>
+            </div>
+          </div>
+
+          <div class="actions">
+            <!-- LINK ke webgis kamu -->
+            <a class="btn primary" href="index.html">
+              <span class="icon">🗺️</span>
+              Buka WebGIS
+            </a>
+
+            <!-- LINK ke halaman anggota -->
+            <a class="btn secondary" href="anggota.html">
+              <span class="icon">👥</span>
+              Anggota Kelompok
+            </a>
+
+            <!-- Opsional: dokumentasi -->
+            <a class="btn ghost" href="README.html" onclick="return true;">
+              <span class="icon">📄</span>
+              Dokumentasi
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDE -->
+      <div class="card side">
+        <div class="card-body">
+          <h3>Petunjuk Singkat</h3>
+          <ul>
+            <li>Klik garis jalan untuk membuka popup.</li>
+            <li>Gunakan ikon penggaris untuk mengukur jarak/luas.</li>
+            <li>Gunakan ikon pencarian untuk mencari lokasi.</li>
+            <li>Legenda blok ada di kanan bawah peta.</li>
+          </ul>
+          <div class="badge">Tip: Pastikan folder <b>data/</b> & <b>FOTO/</b> sudah terupload</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>© Capstone Design • Inventaris Kondisi Jalan Lingkungan</div>
+      <div>Universitas (Itenas) • WebGIS</div>
+    </div>
+  </div>
+</body>
+</html>
