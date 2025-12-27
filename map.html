@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<title>WebGIS Desa – Jalan</title>
+<title>Inventaris Kondisi Jalan Lingkungan</title>
 
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -10,11 +10,200 @@
 <!-- Measure -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-measure/dist/leaflet-measure.css"/>
 
-<!-- Search -->
+<!-- Search (Geocoder) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
 
 <style>
-  html, body, #map { height: 100%; margin: 0; }
+  :root{
+    --topbar-h: 72px;
+    --sidebar-w: 330px;
+    --nav-bg: #0b3a57;   /* biru gelap */
+    --panel-bg: #f7f9fc;
+    --panel-border: #d7dee9;
+    --text: #1f2a37;
+    --muted: #6b7280;
+    --btn: #2563eb;
+    --btn-hover: #1d4ed8;
+  }
+
+  html, body{ height: 100%; margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--text); }
+
+  /* Layout */
+  .app{
+    height: 100%;
+    display: grid;
+    grid-template-rows: var(--topbar-h) 1fr;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-areas:
+      "topbar topbar"
+      "sidebar mapwrap";
+  }
+
+  /* Topbar */
+  .topbar{
+    grid-area: topbar;
+    background: linear-gradient(180deg, #0b3a57 0%, #072c43 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    z-index: 9999;
+  }
+
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+  }
+
+  .brand img{
+    height: 38px;
+    width: auto;
+    display: block;
+  }
+
+  .brand .brand-text{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+
+  .brand .brand-text .sub{
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+  }
+
+  .titlewrap{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    gap: 4px;
+  }
+
+  .titlewrap .title{
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  /* CATATAN: "WebGIS Desa" DIHAPUS sesuai permintaan */
+
+  /* Sidebar */
+  .sidebar{
+    grid-area: sidebar;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--panel-border);
+    overflow: auto;
+  }
+
+  .panel{
+    margin: 14px;
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  }
+
+  .panel-head{
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    font-weight: 700;
+    background: #fbfcff;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .panel-body{
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .panel-body ul{
+    padding-left: 18px;
+    margin: 8px 0 0;
+    color: var(--muted);
+  }
+  .panel-body li{ margin: 6px 0; }
+
+  .btnrow{
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .btn{
+    appearance: none;
+    border: none;
+    background: var(--btn);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s ease-in-out;
+    flex: 1;
+    text-align: center;
+  }
+  .btn:hover{ background: var(--btn-hover); }
+
+  .btn.secondary{
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid var(--panel-border);
+  }
+  .btn.secondary:hover{ background: #f3f6fb; }
+
+  .field{
+    margin-top: 12px;
+  }
+  .field label{
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .field input{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    outline: none;
+    font-size: 13px;
+  }
+  .hint{
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Summary */
+  .summary{
+    margin: 14px;
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  }
+  .summary .panel-head{ border-radius: 12px 12px 0 0; }
+  .summary .panel-body{ color: var(--muted); }
+  .summary .panel-body ul{ margin-top: 10px; }
+
+  /* Map */
+  .mapwrap{
+    grid-area: mapwrap;
+    position: relative;
+  }
+  #map{
+    height: calc(100vh - var(--topbar-h));
+    width: 100%;
+  }
 
   /* Popup image */
   .popup-img{
@@ -27,11 +216,11 @@
 
   /* Legend */
   .legend{
-    background: #fff;
+    background: rgba(255,255,255,0.95);
     padding: 10px 12px;
     font-size: 12px;
     line-height: 18px;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 0 12px rgba(0,0,0,0.25);
     max-height: 260px;
     overflow: auto;
@@ -41,14 +230,14 @@
     height: 4px;
     float: left;
     margin: 7px 8px 0 0;
+    border-radius: 3px;
   }
 
-  /* Label desa (TIDAK BOLEH NANGKEP KLIK) */
+  /* Label desa (klik tembus) */
   .desa-label{
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
-    color: #2b2b2b;
+    color: #1f2937;
     text-align: center;
     white-space: nowrap;
     text-shadow:
@@ -56,15 +245,107 @@
        1px -1px 0 #ffffff,
       -1px  1px 0 #ffffff,
        1px  1px 0 #ffffff;
-
-    /* ini yang bikin klik tembus ke layer jalan */
     pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 980px){
+    :root{ --sidebar-w: 300px; }
+    .titlewrap .title{ font-size: 18px; }
+  }
+  @media (max-width: 820px){
+    .app{
+      grid-template-rows: var(--topbar-h) 1fr;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "topbar"
+        "mapwrap";
+    }
+    .sidebar{ display: none; }
+    #map{ height: calc(100vh - var(--topbar-h)); }
   }
 </style>
 </head>
 
 <body>
-<div id="map"></div>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <!-- Pastikan file logo ada di repo: /assets/logo-itenas.png (atau ganti sesuai nama filemu) -->
+      <img src="assets/logo-itenas.png" alt="Itenas">
+      <div class="brand-text">
+        <div style="color:#fff; font-weight:800; letter-spacing:.2px;">Inventaris Kondisi Jalan Lingkungan</div>
+        <div class="sub">Capstone Design</div>
+      </div>
+    </div>
+
+    <div class="titlewrap">
+      <div class="title"></div>
+      <!-- "WebGIS Desa" DIHILANGKAN -->
+    </div>
+
+    <!-- Help / Feedback / Login DIHILANGKAN -->
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Tab Data Sets / Additional / Results DIHILANGKAN -->
+    <div class="panel">
+      <div class="panel-head">Search Criteria</div>
+      <div class="panel-body">
+        Gunakan panel ini untuk membantu navigasi peta:
+        <ul>
+          <li><b>Home</b> untuk kembali ke tampilan awal</li>
+          <li><b>Search</b> untuk mencari lokasi</li>
+          <li><b>Measure</b> untuk mengukur jarak/luas</li>
+          <li>Klik garis jalan untuk melihat popup dan foto</li>
+        </ul>
+
+        <div class="btnrow">
+          <button class="btn" id="btnHome">Home View</button>
+          <!-- Zoom Data DIHILANGKAN -->
+        </div>
+
+        <div class="field">
+          <label>Koordinat pusat (Lat, Lon)</label>
+          <input id="centerBox" type="text" value="0.6226, 117.2870" />
+          <div class="hint">Format: lat, lon (contoh: 0.6226, 117.2870)</div>
+        </div>
+
+        <div class="field">
+          <label>Zoom</label>
+          <input id="zoomBox" type="number" min="1" max="20" value="11" />
+        </div>
+
+        <div class="btnrow">
+          <button class="btn secondary" id="btnGo">Go</button>
+          <button class="btn secondary" id="btnClear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="panel-head">Summary</div>
+      <div class="panel-body">
+        Layer:
+        <ul>
+          <li>Garis jalan (No_1–No_72)</li>
+          <li>Batas desa (outline merah)</li>
+          <li>Label nama desa</li>
+          <li>Legenda blok (A–O)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="mapwrap">
+    <div id="map"></div>
+  </div>
+
+</div>
 
 <!-- JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -132,6 +413,8 @@ function popupHTML(p){
     p.KLASIFIKASI ??
     "JALAN LINGKUNGAN";
 
+  const foto = (p.FOTO ?? "").trim();
+
   return `
     <b>Informasi Jalan</b><br><br>
     No : ${p.No ?? "-"}<br>
@@ -143,7 +426,7 @@ function popupHTML(p){
     Klasifikasi Jalan : ${klas}<br>
     <hr>
     <b>Foto:</b><br>
-    <img src="FOTO/${p.FOTO ?? ""}" class="popup-img" onerror="this.style.display='none'">
+    <img src="FOTO/${foto}" class="popup-img" onerror="this.style.display='none'">
   `;
 }
 
@@ -258,6 +541,40 @@ legend.onAdd = function(){
   return div;
 };
 legend.addTo(map);
+
+// =====================================================
+// 10) SIDEBAR BUTTONS (Home/Go/Clear)
+// =====================================================
+const btnHome = document.getElementById("btnHome");
+const btnGo = document.getElementById("btnGo");
+const btnClear = document.getElementById("btnClear");
+const centerBox = document.getElementById("centerBox");
+const zoomBox = document.getElementById("zoomBox");
+
+btnHome?.addEventListener("click", () => {
+  map.setView(INITIAL_CENTER, INITIAL_ZOOM);
+});
+
+btnGo?.addEventListener("click", () => {
+  const raw = (centerBox.value || "").trim();
+  const z = parseInt(zoomBox.value || INITIAL_ZOOM, 10);
+
+  const parts = raw.split(",").map(s => s.trim());
+  if(parts.length !== 2) return;
+
+  const lat = parseFloat(parts[0]);
+  const lon = parseFloat(parts[1]);
+  if(Number.isFinite(lat) && Number.isFinite(lon)){
+    map.setView([lat, lon], Number.isFinite(z) ? z : INITIAL_ZOOM);
+  }
+});
+
+btnClear?.addEventListener("click", () => {
+  centerBox.value = `${INITIAL_CENTER[0]}, ${INITIAL_CENTER[1]}`;
+  zoomBox.value = `${INITIAL_ZOOM}`;
+});
 </script>
 </body>
 </html>
+
+pada map.html ini tolong berikan halaman back untu ke halaman utama tadi ke index.html
