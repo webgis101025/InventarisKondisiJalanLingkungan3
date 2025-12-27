@@ -16,273 +16,352 @@
 
   <style>
     :root{
-      --bg: #0b1220;
-      --card: rgba(255,255,255,0.92);
-      --card2: rgba(255,255,255,0.80);
-      --text: #1b1f2a;
-      --muted: #5b6476;
-      --accent: #22c55e;
-      --shadow: 0 18px 45px rgba(0,0,0,0.18);
-      --shadow2: 0 10px 25px rgba(0,0,0,0.18);
-      --radius: 14px;
+      --nav:#0b3556;         /* biru tua ala USGS */
+      --nav2:#08304d;
+      --bg:#f2f4f7;
+      --panel:#ffffff;
+      --panel2:#f7f9fc;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#d6dde8;
+      --shadow: 0 10px 24px rgba(0,0,0,0.15);
+      --radius: 8px;
+      --accent:#2563eb;
     }
 
-    html, body { height: 100%; margin: 0; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #111827; }
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); }
 
-    /* Map full screen */
-    #map { height: 100vh; width: 100vw; }
+    /* ====== Layout ala USGS ====== */
+    .app{
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
 
-    /* ======= Top Bar ======= */
-    .topbar{
-      position: absolute;
+    /* Header */
+    .header{
+      height:64px;
+      background: linear-gradient(0deg, var(--nav2), var(--nav));
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 16px;
+      box-shadow: var(--shadow);
       z-index: 9999;
-      top: 14px;
-      left: 14px;
-      right: 14px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-      pointer-events: none; /* biar map tetap bisa digeser */
     }
-
     .brand{
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: var(--radius);
-      background: rgba(17,24,39,0.70);
-      color: #fff;
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.15);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      letter-spacing:.3px;
     }
-    .brand .dot{
-      width: 10px; height: 10px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 6px rgba(34,197,94,0.18);
-      flex: 0 0 auto;
+    .brand .logo{
+      width:38px;height:38px;
+      border-radius:6px;
+      background:#fff;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--nav);
+      font-weight:900;
+      font-size:14px;
     }
     .brand .title{
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 1.1;
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
     }
-    .brand .subtitle{
-      font-size: 12px;
-      opacity: 0.85;
-      margin-top: 2px;
-    }
-
-    .toolbar{
-      pointer-events: auto;
-      display: flex;
-      gap: 10px;
-      align-items: center;
+    .brand .title small{
+      font-weight:400;
+      opacity:.9;
     }
 
-    .chip{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
+    .navlinks{
+      display:flex;
+      gap:16px;
+      font-size:13px;
+      opacity:.95;
+    }
+    .navlinks a{
+      color:#fff; text-decoration:none;
+    }
+    .navlinks a:hover{ text-decoration:underline; }
+
+    /* Main area */
+    .main{
+      flex:1;
+      display:flex;
+      min-height:0;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width:360px;
+      background:var(--panel);
+      border-right:1px solid var(--border);
+      padding:12px;
+      overflow:auto;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:10px;
+    }
+    .tab{
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-bottom:none;
+      background:var(--panel2);
+      border-top-left-radius:6px;
+      border-top-right-radius:6px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .tab.active{
+      background:#fff;
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .section{
+      border:1px solid var(--border);
       border-radius: var(--radius);
-      background: rgba(255,255,255,0.92);
-      color: var(--text);
-      box-shadow: var(--shadow2);
-      border: 1px solid rgba(0,0,0,0.08);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      font-size: 13px;
-      user-select: none;
+      overflow:hidden;
+      margin-bottom:12px;
+      background:#fff;
     }
-    .chip b{ font-weight: 700; }
-    .chip .hint{ color: var(--muted); }
+    .section .section-h{
+      background:var(--panel2);
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-weight:700;
+      font-size:13px;
+      color:var(--text);
+    }
+    .section .section-b{
+      padding:10px 12px;
+      font-size:13px;
+      color:var(--text);
+    }
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
 
+    .btnrow{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
     .btn{
-      cursor: pointer;
-      border: 0;
-      padding: 10px 12px;
-      border-radius: var(--radius);
-      background: rgba(255,255,255,0.92);
-      box-shadow: var(--shadow2);
-      border: 1px solid rgba(0,0,0,0.08);
-      font-weight: 700;
-      font-size: 13px;
-      color: #111827;
+      border:1px solid var(--border);
+      background:#fff;
+      padding:8px 10px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
     }
-    .btn:hover{ filter: brightness(0.98); }
-
-    /* ======= Popup styling ======= */
-    .leaflet-popup-content-wrapper{
-      border-radius: 16px !important;
-      box-shadow: var(--shadow) !important;
-      border: 1px solid rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    .leaflet-popup-content{
-      margin: 0 !important;
-      width: 320px !important;
+    .btn.primary{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#fff;
     }
 
-    .popup{
-      background: #fff;
-      color: var(--text);
+    .field{
+      margin-top:10px;
     }
-    .popup-header{
-      padding: 12px 14px;
-      background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(59,130,246,0.15));
-      border-bottom: 1px solid rgba(0,0,0,0.08);
+    .field label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+      font-weight:700;
     }
-    .popup-header .h1{
-      font-weight: 800;
-      font-size: 14px;
-      margin: 0;
+    .field input, .field select{
+      width:100%;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:6px;
+      outline:none;
+      font-size:13px;
+      background:#fff;
     }
-    .popup-body{
-      padding: 12px 14px 14px 14px;
-    }
-    .kv{
-      display: grid;
-      grid-template-columns: 110px 1fr;
-      gap: 6px 10px;
-      font-size: 13px;
-      line-height: 1.25;
-    }
-    .kv .k{ color: var(--muted); }
-    .kv .v{ font-weight: 600; }
-    .divider{
-      height: 1px;
-      background: rgba(0,0,0,0.08);
-      margin: 10px 0;
+    .field input:focus, .field select:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
     }
 
+    .smallnote{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Map container */
+    .mapwrap{
+      flex:1;
+      min-width:0;
+      position:relative;
+    }
+    #map{
+      position:absolute;
+      inset:0;
+    }
+
+    /* Popup image */
     .popup-img{
       width: 100%;
-      max-width: 100%;
-      border-radius: 12px;
-      display: block;
-      margin-top: 8px;
-      border: 1px solid rgba(0,0,0,0.08);
-    }
-    .photo-caption{
+      max-width: 280px;
+      border-radius: 8px;
       margin-top: 6px;
-      font-size: 12px;
-      color: var(--muted);
+      display: block;
+      border:1px solid rgba(0,0,0,0.08);
     }
 
-    /* ======= Legend ======= */
+    /* Legend */
     .legend{
-      background: rgba(255,255,255,0.92);
+      background: #fff;
       padding: 10px 12px;
       font-size: 12px;
       line-height: 18px;
-      border-radius: 14px;
-      box-shadow: var(--shadow2);
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.25);
       max-height: 260px;
       overflow: auto;
-      border: 1px solid rgba(0,0,0,0.08);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .legend-title{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-weight: 800;
-      margin-bottom: 6px;
+      border:1px solid rgba(0,0,0,0.12);
     }
     .legend i{
-      width: 30px;
-      height: 5px;
+      width: 28px;
+      height: 4px;
       float: left;
       margin: 7px 8px 0 0;
-      border-radius: 999px;
+      border-radius:999px;
     }
 
-    /* ======= Label Desa ======= */
+    /* Label desa (klik tembus) */
     .desa-label{
+      font-family: Arial, Helvetica, sans-serif;
       font-weight: 700;
       font-size: 13px;
-      color: rgba(17,24,39,0.95);
+      color: #1f2937;
       text-align: center;
       white-space: nowrap;
-      letter-spacing: 0.2px;
       padding: 3px 8px;
       border-radius: 999px;
       background: rgba(255,255,255,0.75);
       border: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      pointer-events: none; /* klik tembus */
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+      pointer-events: none;
     }
 
-    /* ======= Leaflet controls positioning & style ======= */
-    .leaflet-control-zoom{
-      border-radius: 12px !important;
-      overflow: hidden;
-      box-shadow: var(--shadow2);
-      border: 1px solid rgba(0,0,0,0.12);
+    /* Responsive: sidebar jadi collapsible sederhana */
+    @media (max-width: 900px){
+      .sidebar{ width: 320px; }
     }
-    .leaflet-bar a{
-      width: 38px !important;
-      height: 38px !important;
-      line-height: 38px !important;
-    }
-
-    /* Search (geocoder) more compact */
-    .leaflet-control-geocoder{
-      border-radius: 12px !important;
-      overflow: hidden;
-      box-shadow: var(--shadow2);
-      border: 1px solid rgba(0,0,0,0.12);
-    }
-    .leaflet-control-geocoder-form input{
-      padding: 10px !important;
-    }
-
-    /* Measure control style */
-    .leaflet-control-measure{
-      border-radius: 12px !important;
-      overflow: hidden;
-      box-shadow: var(--shadow2);
-      border: 1px solid rgba(0,0,0,0.12);
-    }
-
-    /* Small responsive adjustments */
     @media (max-width: 720px){
-      .chip{ display:none; }
-      .brand .subtitle{ display:none; }
-      .leaflet-popup-content{ width: 280px !important; }
+      .sidebar{ display:none; }
+      .header{ height:56px; }
     }
   </style>
 </head>
 
 <body>
-  <div id="map"></div>
-
-  <!-- Topbar UI -->
-  <div class="topbar">
-    <div class="brand">
-      <span class="dot"></span>
-      <div>
-        <div class="title">Inventaris Kondisi Jalan Lingkungan</div>
-        <div class="subtitle">WebGIS • Jalan & Batas Desa</div>
+  <div class="app">
+    <!-- Header ala USGS -->
+    <div class="header">
+      <div class="brand">
+        <div class="logo">GIS</div>
+        <div class="title">
+          <div>Inventaris Jalan Lingkungan</div>
+          <small>WebGIS Desa</small>
+        </div>
+      </div>
+      <div class="navlinks">
+        <a href="#" onclick="return false;">Help</a>
+        <a href="#" onclick="return false;">Feedback</a>
+        <a href="#" onclick="return false;">Login</a>
       </div>
     </div>
 
-    <div class="toolbar">
-      <div class="chip">
-        <b>Tip:</b> <span class="hint">Klik garis jalan untuk detail & foto</span>
+    <!-- Main -->
+    <div class="main">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="tabs">
+          <div class="tab active">Search Criteria</div>
+          <div class="tab">Data Sets</div>
+          <div class="tab">Additional</div>
+          <div class="tab">Results</div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">1. Enter Search Criteria</div>
+          <div class="section-b">
+            <div class="hint">
+              Gunakan panel ini untuk membantu navigasi peta:
+              <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
+                <li><b>Home</b> untuk kembali ke tampilan awal</li>
+                <li><b>Search</b> untuk mencari lokasi</li>
+                <li><b>Measure</b> untuk mengukur jarak/luas</li>
+                <li>Klik garis jalan untuk melihat <b>popup</b> dan <b>foto</b></li>
+              </ul>
+            </div>
+
+            <div class="btnrow">
+              <button class="btn primary" id="btnHome" type="button">Home View</button>
+              <button class="btn" id="btnZoomData" type="button">Zoom Data</button>
+            </div>
+
+            <div class="field">
+              <label>Koordinat pusat (Lat, Lon)</label>
+              <input id="coordInput" type="text" value="0.6226, 117.2870" />
+              <div class="smallnote">Format: <b>lat, lon</b> (contoh: 0.6226, 117.2870)</div>
+            </div>
+
+            <div class="field">
+              <label>Zoom</label>
+              <select id="zoomSelect">
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11" selected>11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+              </select>
+            </div>
+
+            <div class="btnrow">
+              <button class="btn" id="btnGo" type="button">Go</button>
+              <button class="btn" id="btnClear" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">Summary</div>
+          <div class="section-b">
+            <div class="hint">
+              Layer:
+              <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
+                <li>Garis jalan (No_1–No_72)</li>
+                <li>Batas desa (outline merah)</li>
+                <li>Label nama desa</li>
+                <li>Legenda blok (A–O)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Map -->
+      <div class="mapwrap">
+        <div id="map"></div>
       </div>
-      <button class="btn" id="btnHome" type="button">Home</button>
     </div>
   </div>
 
@@ -292,43 +371,36 @@
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
   <script>
-    // =====================================================
-    // 1) SETTING ZOOM AWAL (FIX)
-    // =====================================================
-    const INITIAL_CENTER = [0.6226, 117.2870]; // N 00°37'21.3" E 117°17'16.9"
+    // =========================
+    // SCRIPT KAMU (LOGIKA UTAMA TETAP)
+    // =========================
+
+    // 1) SETTING ZOOM AWAL
+    const INITIAL_CENTER = [0.6226, 117.2870];
     const INITIAL_ZOOM = 11;
 
-    const map = L.map("map", {
-      preferCanvas: true,
-      zoomControl: true
-    }).setView(INITIAL_CENTER, INITIAL_ZOOM);
+    const map = L.map("map", { preferCanvas: true }).setView(INITIAL_CENTER, INITIAL_ZOOM);
 
-    // Basemap options (lebih "profesional" ada switcher)
+    // Basemap ESRI
     const esriImagery = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { maxZoom: 20, attribution: "Tiles © Esri" }
+      { maxZoom: 20 }
     ).addTo(map);
 
+    // OSM (opsional)
     const osm = L.tileLayer(
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { maxZoom: 20, attribution: "© OpenStreetMap contributors" }
+      { maxZoom: 20 }
     );
 
-    const baseLayers = {
-      "ESRI Imagery": esriImagery,
-      "OpenStreetMap": osm
-    };
+    // Switch basemap (tanpa ubah logika layer jalan)
+    L.control.layers(
+      { "ESRI Imagery": esriImagery, "OpenStreetMap": osm },
+      null,
+      { position: "topright", collapsed: true }
+    ).addTo(map);
 
-    L.control.layers(baseLayers, null, { position: "topleft", collapsed: true }).addTo(map);
-
-    // Home button
-    document.getElementById("btnHome").addEventListener("click", () => {
-      map.setView(INITIAL_CENTER, INITIAL_ZOOM, { animate: true });
-    });
-
-    // =====================================================
-    // 2) PANE (Z-INDEX) BIAR JALAN SELALU BISA DIKLIK
-    // =====================================================
+    // 2) PANE
     map.createPane("batasPane");
     map.getPane("batasPane").style.zIndex = 350;
 
@@ -336,11 +408,9 @@
     map.getPane("jalanPane").style.zIndex = 450;
 
     map.createPane("labelPane");
-    map.getPane("labelPane").style.zIndex = 520;
+    map.getPane("labelPane").style.zIndex = 500;
 
-    // =====================================================
     // 3) WARNA BLOK
-    // =====================================================
     function warnaBlok(blok){
       switch(blok){
         case "A": return "#e41a1c";
@@ -362,95 +432,50 @@
       }
     }
 
-    // =====================================================
-    // 4) POPUP JALAN (LEBIH RAPI)
-    // =====================================================
-    function safe(v){ return (v === undefined || v === null || v === "") ? "-" : v; }
-
+    // 4) POPUP JALAN
     function popupHTML(p){
-      const no = safe(p.No);
-      const desa = safe(p["Nama Desa"] ?? p.Nama_Desa);
-      const blok = safe(p.Blok);
-      const panjang = safe(p.Panjang);
-      const lebar = safe(p.Lebar);
-      const kondisi = safe(p.Kondisi);
-
-      const klas = safe(
+      const klas =
         p["Klasifikasi Jalan"] ??
         p.Klasifikasi_Jalan ??
         p.KLASIFIKASI ??
-        "JALAN LINGKUNGAN"
-      );
-
-      const foto = (p.FOTO ?? "").trim();
+        "JALAN LINGKUNGAN";
 
       return `
-        <div class="popup">
-          <div class="popup-header">
-            <p class="h1">Informasi Jalan</p>
-          </div>
-          <div class="popup-body">
-            <div class="kv">
-              <div class="k">No</div><div class="v">${no}</div>
-              <div class="k">Nama Desa</div><div class="v">${desa}</div>
-              <div class="k">Blok</div><div class="v">${blok}</div>
-              <div class="k">Panjang</div><div class="v">${panjang}</div>
-              <div class="k">Lebar</div><div class="v">${lebar}</div>
-              <div class="k">Kondisi</div><div class="v">${kondisi}</div>
-              <div class="k">Klasifikasi</div><div class="v">${klas}</div>
-            </div>
-
-            <div class="divider"></div>
-            <div style="font-weight:800; font-size:13px;">Foto</div>
-            ${foto ? `
-              <img src="FOTO/${foto}" class="popup-img"
-                   onerror="this.style.display='none'">
-              <div class="photo-caption">${foto}</div>
-            ` : `
-              <div class="photo-caption">Tidak ada foto.</div>
-            `}
-          </div>
-        </div>
+        <b>Informasi Jalan</b><br><br>
+        No : ${p.No ?? "-"}<br>
+        Nama Desa : ${p["Nama Desa"] ?? p.Nama_Desa ?? "-"}<br>
+        Blok : ${p.Blok ?? "-"}<br>
+        Panjang : ${p.Panjang ?? "-"}<br>
+        Lebar : ${p.Lebar ?? "-"}<br>
+        Kondisi : ${p.Kondisi ?? "-"}<br>
+        Klasifikasi Jalan : ${klas}<br>
+        <hr>
+        <b>Foto:</b><br>
+        <img src="FOTO/${p.FOTO ?? ""}" class="popup-img" onerror="this.style.display='none'">
       `;
     }
 
-    // =====================================================
     // 5) LOAD JALAN (No_1 – No_72)
-    // =====================================================
-    // Supaya popup selalu bisa diklik (tidak ketimpa label/batas):
-    // - jalanPane lebih tinggi dari batasPane
-    // - label pointer-events none
-    // - batas interactive false
-
     for(let i=1;i<=72;i++){
       fetch(`data/No_${i}.geojson`)
-        .then(r => {
-          if(!r.ok) throw new Error("GeoJSON tidak ditemukan: No_" + i);
-          return r.json();
-        })
+        .then(r => r.json())
         .then(data => {
           L.geoJSON(data,{
             pane: "jalanPane",
             interactive: true,
             style: f => ({
               color: warnaBlok(f.properties?.Blok),
-              weight: 4,
-              opacity: 0.95
+              weight: 4
             }),
             onEachFeature:(f,l)=>{
-              l.bindPopup(popupHTML(f.properties || {}), { closeButton: true });
-              // efek hover biar “hidup”
-              l.on("mouseover", () => l.setStyle({ weight: 6, opacity: 1 }));
-              l.on("mouseout", () => l.setStyle({ weight: 4, opacity: 0.95 }));
+              l.bindPopup(popupHTML(f.properties || {}));
             }
           }).addTo(map);
         })
         .catch(() => {});
     }
 
-    // =====================================================
-    // 6) BATAS DESA OUTLINE MERAH + LABEL NAMA DESA
-    // =====================================================
+    // 6) BATAS DESA OUTLINE MERAH + LABEL
     function getNamaDesa(props){
       return (
         props["Nama Desa"] ||
@@ -463,10 +488,7 @@
     }
 
     fetch("data/Batas_Desa.geojson")
-      .then(r => {
-        if(!r.ok) throw new Error("Batas_Desa.geojson tidak ditemukan");
-        return r.json();
-      })
+      .then(r => r.json())
       .then(data => {
         const batasLayer = L.geoJSON(data,{
           pane: "batasPane",
@@ -474,7 +496,6 @@
           style:{
             color:"#ff0000",
             weight:2,
-            opacity: 0.95,
             fill:false
           }
         }).addTo(map);
@@ -500,53 +521,35 @@
         });
       })
       .catch(() => {
-        // Tidak pakai alert biar tidak “mengganggu” user
         console.warn("Batas_Desa.geojson tidak ditemukan. Pastikan file ada di folder data/");
       });
 
-    // =====================================================
     // 7) MEASURE TOOL
-    // =====================================================
-    // (kalau map bergerak saat measure, biasanya karena drag map aktif,
-    // plugin measure defaultnya aman, tapi kita pastikan)
-    const measureControl = L.control.measure({
+    L.control.measure({
       position: "topleft",
       primaryLengthUnit: "meters",
       secondaryLengthUnit: "kilometers",
       primaryAreaUnit: "sqmeters",
-      secondaryAreaUnit: "hectares",
-      activeColor: "#22c55e",
-      completedColor: "#16a34a"
+      secondaryAreaUnit: "hectares"
     }).addTo(map);
 
-    // =====================================================
     // 8) SEARCH LOKASI
-    // =====================================================
     L.Control.geocoder({
       position: "topright",
-      defaultMarkGeocode: true,
-      placeholder: "Cari lokasi..."
+      defaultMarkGeocode: true
     }).addTo(map);
 
-    // =====================================================
     // 9) LEGENDA BLOK (GARIS)
-    // =====================================================
     const legend = L.control({position:"bottomright"});
     legend.onAdd = function(){
       const div = L.DomUtil.create("div","legend");
-      div.innerHTML = `
-        <div class="legend-title">
-          <span>Legenda Blok</span>
-          <span style="font-size:11px;color:#6b7280;">A–O</span>
-        </div>
-      `;
+      div.innerHTML += "<b>Legenda Blok</b><br>";
 
       const blok = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"];
       blok.forEach(b=>{
-        div.innerHTML += `<div><i style="background:${warnaBlok(b)}"></i> Blok ${b}</div>`;
+        div.innerHTML += `<i style="background:${warnaBlok(b)}"></i> Blok ${b}<br>`;
       });
 
-      // Biar legend bisa di-scroll tanpa nge-drag peta
       L.DomEvent.disableClickPropagation(div);
       L.DomEvent.disableScrollPropagation(div);
 
@@ -554,8 +557,57 @@
     };
     legend.addTo(map);
 
-    // Optional: tampilkan skala
-    L.control.scale({ position: "bottomleft", imperial: false }).addTo(map);
+    // =========================
+    // UI SIDEBAR (TAMBAHAN, TANPA MENGUBAH LOGIKA UTAMA)
+    // =========================
+    const btnHome = document.getElementById("btnHome");
+    const btnZoomData = document.getElementById("btnZoomData");
+    const btnGo = document.getElementById("btnGo");
+    const btnClear = document.getElementById("btnClear");
+    const coordInput = document.getElementById("coordInput");
+    const zoomSelect = document.getElementById("zoomSelect");
+
+    btnHome.addEventListener("click", () => {
+      map.setView(INITIAL_CENTER, INITIAL_ZOOM, { animate: true });
+      coordInput.value = `${INITIAL_CENTER[0]}, ${INITIAL_CENTER[1]}`;
+      zoomSelect.value = String(INITIAL_ZOOM);
+    });
+
+    btnGo.addEventListener("click", () => {
+      const raw = coordInput.value.trim();
+      const parts = raw.split(",").map(s => s.trim());
+      if(parts.length !== 2) return;
+
+      const lat = parseFloat(parts[0]);
+      const lon = parseFloat(parts[1]);
+      const z = parseInt(zoomSelect.value, 10);
+
+      if(Number.isFinite(lat) && Number.isFinite(lon) && Number.isFinite(z)){
+        map.setView([lat, lon], z, { animate: true });
+      }
+    });
+
+    btnClear.addEventListener("click", () => {
+      coordInput.value = "";
+      zoomSelect.value = String(INITIAL_ZOOM);
+    });
+
+    // Zoom Data: coba zoom ke batas desa kalau ada, kalau belum ada tetap home
+    btnZoomData.addEventListener("click", () => {
+      fetch("data/Batas_Desa.geojson")
+        .then(r => r.json())
+        .then(gj => {
+          const tmp = L.geoJSON(gj);
+          const b = tmp.getBounds();
+          if(b && b.isValid()){
+            map.fitBounds(b, { padding:[20,20] });
+          }else{
+            map.setView(INITIAL_CENTER, INITIAL_ZOOM);
+          }
+        })
+        .catch(() => map.setView(INITIAL_CENTER, INITIAL_ZOOM));
+    });
+
   </script>
 </body>
 </html>
