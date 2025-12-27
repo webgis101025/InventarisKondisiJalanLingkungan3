@@ -17,16 +17,26 @@
   :root{
     --topbar-h: 72px;
     --sidebar-w: 330px;
-    --nav-bg: #0b3a57;   /* biru gelap */
+    --nav-bg: #0b3a57;
     --panel-bg: #f7f9fc;
     --panel-border: #d7dee9;
     --text: #1f2a37;
     --muted: #6b7280;
     --btn: #2563eb;
     --btn-hover: #1d4ed8;
+
+    /* gaya tombol homepage (abu-abu glossy) */
+    --pillTop: rgba(255,255,255,0.22);
+    --pillBot: rgba(255,255,255,0.08);
+    --pillBorder: rgba(255,255,255,0.26);
   }
 
-  html, body{ height: 100%; margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--text); }
+  html, body{
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+  }
 
   /* Layout */
   .app{
@@ -76,22 +86,45 @@
     margin-top: 2px;
   }
 
-  /* Tombol Back */
+  /* Tombol Back (DIUBAH: sama seperti tombol Homepage) */
   .btn-back{
-    background: rgba(255,255,255,0.12);
-    color: #ffffff;
-    padding: 10px 16px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 18px;
     border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all .15s ease-in-out;
-    border: 1px solid rgba(255,255,255,0.25);
-    user-select: none;
+    color:#ffffff;
+    text-decoration:none;
+    font-weight:900;
+    letter-spacing:.2px;
+
+    background: linear-gradient(180deg, var(--pillTop), var(--pillBot));
+    border: 1px solid var(--pillBorder);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.22),
+      0 10px 18px rgba(0,0,0,0.25);
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+    user-select:none;
+    -webkit-user-select:none;
+    white-space: nowrap;
   }
   .btn-back:hover{
-    background: rgba(255,255,255,0.22);
     transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.10));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.24),
+      0 12px 22px rgba(0,0,0,0.30);
+  }
+  .btn-back:active{
+    transform: translateY(0px);
+    box-shadow:
+      inset 0 2px 10px rgba(0,0,0,0.22),
+      0 8px 16px rgba(0,0,0,0.22);
   }
 
   /* Sidebar */
@@ -274,7 +307,6 @@
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="brand">
-      <!-- Pastikan file logo ada: /assets/logo-itenas.png -->
       <img src="assets/logo-itenas.png" alt="Itenas">
       <div class="brand-text">
         <div style="color:#fff; font-weight:800; letter-spacing:.2px;">Inventaris Kondisi Jalan Lingkungan</div>
@@ -282,11 +314,10 @@
       </div>
     </div>
 
-    <!-- Spacer -->
     <div style="flex:1"></div>
 
-    <!-- Back ke halaman utama -->
-    <a href="index.html" class="btn-back">← Kembali ke Beranda</a>
+    <!-- Back ke halaman utama (tampil seperti tombol Homepage) -->
+    <a href="index.html" class="btn-back">Homepage</a>
   </div>
 
   <!-- SIDEBAR -->
@@ -296,7 +327,7 @@
       <div class="panel-body">
         Gunakan panel ini untuk membantu navigasi peta:
         <ul>
-          <li><b>Home</b> untuk kembali ke tampilan awal</li>
+          <li><b>Homepage</b> untuk kembali ke tampilan awal</li>
           <li><b>Search</b> untuk mencari lokasi</li>
           <li><b>Measure</b> untuk mengukur jarak/luas</li>
           <li>Klik garis jalan untuk melihat popup dan foto</li>
@@ -351,35 +382,25 @@
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-// =====================================================
-// 1) SETTING ZOOM AWAL (FIX)
-// =====================================================
-const INITIAL_CENTER = [0.6226, 117.2870]; // N 00°37'21.3" E 117°17'16.9"
+const INITIAL_CENTER = [0.6226, 117.2870];
 const INITIAL_ZOOM = 11;
 
 const map = L.map("map", { preferCanvas: true }).setView(INITIAL_CENTER, INITIAL_ZOOM);
 
-// Basemap ESRI
 L.tileLayer(
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   { maxZoom: 20 }
 ).addTo(map);
 
-// =====================================================
-// 2) PANE (Z-INDEX) BIAR JALAN SELALU BISA DIKLIK
-// =====================================================
 map.createPane("batasPane");
 map.getPane("batasPane").style.zIndex = 350;
 
 map.createPane("jalanPane");
-map.getPane("jalanPane").style.zIndex = 450; // di atas batas
+map.getPane("jalanPane").style.zIndex = 450;
 
 map.createPane("labelPane");
-map.getPane("labelPane").style.zIndex = 500; // label di atas, tapi pointer-events none
+map.getPane("labelPane").style.zIndex = 500;
 
-// =====================================================
-// 3) WARNA BLOK
-// =====================================================
 function warnaBlok(blok){
   switch(blok){
     case "A": return "#e41a1c";
@@ -401,9 +422,6 @@ function warnaBlok(blok){
   }
 }
 
-// =====================================================
-// 4) POPUP JALAN
-// =====================================================
 function popupHTML(p){
   const klas =
     p["Klasifikasi Jalan"] ??
@@ -428,9 +446,6 @@ function popupHTML(p){
   `;
 }
 
-// =====================================================
-// 5) LOAD JALAN (No_1 – No_72)
-// =====================================================
 for(let i=1;i<=72;i++){
   fetch(`data/No_${i}.geojson`)
     .then(r => r.json())
@@ -452,9 +467,6 @@ for(let i=1;i<=72;i++){
     .catch(() => {});
 }
 
-// =====================================================
-// 6) BATAS DESA OUTLINE MERAH + LABEL NAMA DESA
-// =====================================================
 function getNamaDesa(props){
   return (
     props["Nama Desa"] ||
@@ -480,7 +492,6 @@ fetch("data/Batas_Desa.geojson")
       }
     }).addTo(map);
 
-    // Label per desa
     batasLayer.eachLayer(layer => {
       if(!layer.feature || !layer.feature.properties) return;
 
@@ -506,9 +517,6 @@ fetch("data/Batas_Desa.geojson")
     alert("Batas_Desa.geojson tidak ditemukan. Pastikan file ada di folder data/");
   });
 
-// =====================================================
-// 7) MEASURE TOOL
-// =====================================================
 L.control.measure({
   primaryLengthUnit: "meters",
   secondaryLengthUnit: "kilometers",
@@ -516,16 +524,10 @@ L.control.measure({
   secondaryAreaUnit: "hectares"
 }).addTo(map);
 
-// =====================================================
-// 8) SEARCH LOKASI
-// =====================================================
 L.Control.geocoder({
   defaultMarkGeocode: true
 }).addTo(map);
 
-// =====================================================
-// 9) LEGENDA BLOK (GARIS)
-// =====================================================
 const legend = L.control({position:"bottomright"});
 legend.onAdd = function(){
   const div = L.DomUtil.create("div","legend");
@@ -540,9 +542,6 @@ legend.onAdd = function(){
 };
 legend.addTo(map);
 
-// =====================================================
-// 10) SIDEBAR BUTTONS (Home/Go/Clear)
-// =====================================================
 const btnHome = document.getElementById("btnHome");
 const btnGo = document.getElementById("btnGo");
 const btnClear = document.getElementById("btnClear");
