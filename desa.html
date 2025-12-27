@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>WebGIS Desa – Jalan</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<!-- Measure -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-measure/dist/leaflet-measure.css"/>
+
+<!-- Search -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+
+<style>
+  html, body, #map { height: 100%; margin: 0; }
+
+  /* Popup image */
+  .popup-img{
+    width: 100%;
+    max-width: 280px;
+    border-radius: 8px;
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* Legend */
+  .legend{
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 18px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    max-height: 260px;
+    overflow: auto;
+  }
+  .legend i{
+    width: 28px;
+    height: 4px;
+    float: left;
+    margin: 7px 8px 0 0;
+  }
+
+  /* Label desa (TIDAK BOLEH NANGKEP KLIK) */
+  .desa-label{
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: #2b2b2b;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow:
+      -1px -1px 0 #ffffff,
+       1px -1px 0 #ffffff,
+      -1px  1px 0 #ffffff,
+       1px  1px 0 #ffffff;
+
+    /* ini yang bikin klik tembus ke layer jalan */
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+
+<!-- JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-measure/dist/leaflet-measure.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+// =====================================================
+// 1) SETTING ZOOM AWAL (FIX)
+// =====================================================
+const INITIAL_CENTER = [0.6226, 117.2870]; // N 00°37'21.3" E 117°17'16.9"
+const INITIAL_ZOOM = 11;
+
+const map = L.map("map", { preferCanvas: true }).setView(INITIAL_CENTER, INITIAL_ZOOM);
+
+// Basemap ESRI
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 20 }
+).addTo(map);
+
+// =====================================================
+// 2) PANE (Z-INDEX) BIAR JALAN SELALU BISA DIKLIK
+// =====================================================
+map.createPane("batasPane");
+map.getPane("batasPane").style.zIndex = 350;
+
+map.createPane("jalanPane");
+map.getPane("jalanPane").style.zIndex = 450; // di atas batas
+
+map.createPane("labelPane");
+map.getPane("labelPane").style.zIndex = 500; // label di atas, tapi pointer-events none
+
+// =====================================================
+// 3) WARNA BLOK
+// =====================================================
+function warnaBlok(blok){
+  switch(blok){
+    case "A": return "#e41a1c";
+    case "B": return "#377eb8";
+    case "C": return "#4daf4a";
+    case "D": return "#ff7f00";
+    case "E": return "#984ea3";
+    case "F": return "#bbffcc";
+    case "G": return "#dd00ff";
+    case "H": return "#2e0e33";
+    case "I": return "#71e3f7";
+    case "J": return "#686323";
+    case "K": return "#eeff00";
+    case "L": return "#8f2f3f";
+    case "M": return "#4d4d4d";
+    case "N": return "#ffffff";
+    case "O": return "#000000";
+    default:  return "#ff0000";
+  }
+}
+
+// =====================================================
+// 4) POPUP JALAN
+// =====================================================
+function popupHTML(p){
+  const klas =
+    p["Klasifikasi Jalan"] ??
+    p.Klasifikasi_Jalan ??
+    p.KLASIFIKASI ??
+    "JALAN LINGKUNGAN";
+
+  return `
+    <b>Informasi Jalan</b><br><br>
+    No : ${p.No ?? "-"}<br>
+    Nama Desa : ${p["Nama Desa"] ?? p.Nama_Desa ?? "-"}<br>
+    Blok : ${p.Blok ?? "-"}<br>
+    Panjang : ${p.Panjang ?? "-"}<br>
+    Lebar : ${p.Lebar ?? "-"}<br>
+    Kondisi : ${p.Kondisi ?? "-"}<br>
+    Klasifikasi Jalan : ${klas}<br>
+    <hr>
+    <b>Foto:</b><br>
+    <img src="FOTO/${p.FOTO ?? ""}" class="popup-img" onerror="this.style.display='none'">
+  `;
+}
+
+// =====================================================
+// 5) LOAD JALAN (No_1 – No_72)
+// =====================================================
+for(let i=1;i<=72;i++){
+  fetch(`data/No_${i}.geojson`)
+    .then(r => r.json())
+    .then(data => {
+      L.geoJSON(data,{
+        pane: "jalanPane",
+        interactive: true,
+        style: f => ({
+          color: warnaBlok(f.properties?.Blok),
+          weight: 4
+        }),
+        onEachFeature:(f,l)=>{
+          l.on("click", () => {
+            l.bindPopup(popupHTML(f.properties || {})).openPopup();
+          });
+        }
+      }).addTo(map);
+    })
+    .catch(() => {});
+}
+
+// =====================================================
+// 6) BATAS DESA OUTLINE MERAH + LABEL NAMA DESA
+// =====================================================
+function getNamaDesa(props){
+  return (
+    props["Nama Desa"] ||
+    props["NAMA_DESA"] ||
+    props["DESA"] ||
+    props["nama_desa"] ||
+    props["NAMOBJ"] ||
+    "Desa"
+  );
+}
+
+fetch("data/Batas_Desa.geojson")
+  .then(r => r.json())
+  .then(data => {
+
+    const batasLayer = L.geoJSON(data,{
+      pane: "batasPane",
+      interactive: false,
+      style:{
+        color:"#ff0000",
+        weight:2,
+        fill:false
+      }
+    }).addTo(map);
+
+    // Label per desa
+    batasLayer.eachLayer(layer => {
+      if(!layer.feature || !layer.feature.properties) return;
+
+      const nama = getNamaDesa(layer.feature.properties);
+      const center = layer.getBounds().getCenter();
+
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="desa-label">${nama}</div>`,
+        iconSize: [0, 0]
+      });
+
+      L.marker(center, {
+        pane: "labelPane",
+        icon,
+        interactive: false,
+        keyboard: false
+      }).addTo(map);
+    });
+
+  })
+  .catch(() => {
+    alert("Batas_Desa.geojson tidak ditemukan. Pastikan file ada di folder data/");
+  });
+
+// =====================================================
+// 7) MEASURE TOOL
+// =====================================================
+L.control.measure({
+  primaryLengthUnit: "meters",
+  secondaryLengthUnit: "kilometers",
+  primaryAreaUnit: "sqmeters",
+  secondaryAreaUnit: "hectares"
+}).addTo(map);
+
+// =====================================================
+// 8) SEARCH LOKASI
+// =====================================================
+L.Control.geocoder({
+  defaultMarkGeocode: true
+}).addTo(map);
+
+// =====================================================
+// 9) LEGENDA BLOK (GARIS)
+// =====================================================
+const legend = L.control({position:"bottomright"});
+legend.onAdd = function(){
+  const div = L.DomUtil.create("div","legend");
+  div.innerHTML += "<b>Legenda Blok</b><br>";
+
+  const blok = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"];
+  blok.forEach(b=>{
+    div.innerHTML += `<i style="background:${warnaBlok(b)}"></i> Blok ${b}<br>`;
+  });
+
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
