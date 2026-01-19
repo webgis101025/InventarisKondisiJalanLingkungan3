@@ -387,7 +387,9 @@ map.createPane("labelPane");
 map.getPane("labelPane").style.zIndex = 500;
 
 /* ===========================
-   WARNA BERDASARKAN KONDISI
+   WARNA BERDASARKAN KONDISI (2 kondisi saja)
+   - TANAH = biru
+   - TANAH DAN SEMEN = merah
    =========================== */
 function normKondisi(k){
   return (k ?? "").toString().trim().toUpperCase();
@@ -395,16 +397,11 @@ function normKondisi(k){
 
 function warnaKondisi(kondisi){
   const k = normKondisi(kondisi);
-
-  // Sesuaikan daftar ini jika ada istilah lain di data kamu
-  if(k.includes("ASPAL")) return "#2f3640";     // hitam/abu gelap
-  if(k.includes("BETON")) return "#9aa0a6";     // abu
-  if(k.includes("PAVING")) return "#b08968";    // coklat muda
-  if(k.includes("KERIKIL")) return "#f59e0b";   // oranye
-  if(k.includes("BATU")) return "#6b7280";      // abu medium
-  if(k.includes("TANAH")) return "#8b5a2b";     // coklat tanah
-  if(k.includes("RUSAK")) return "#dc2626";     // merah (jika ada)
-  return "#2563eb"; // default biru
+  if(k === "TANAH") return "#2563eb";            // biru
+  if(k === "TANAH DAN SEMEN") return "#dc2626";  // merah
+  // fallback kalau ada typo/variasi tulisan
+  if(k.includes("SEMIN") || k.includes("SEMEN")) return "#dc2626";
+  return "#2563eb";
 }
 
 /* ===========================
@@ -526,28 +523,15 @@ L.Control.geocoder({
 }).addTo(map);
 
 /* ===========================
-   LEGENDA KONDISI (GANTI DARI BLOK)
+   LEGENDA KONDISI (2 item)
    =========================== */
 const legend = L.control({position:"bottomright"});
 legend.onAdd = function(){
   const div = L.DomUtil.create("div","legend");
   div.innerHTML += "<b>Legenda Kondisi</b><br>";
 
-  // daftar kondisi yang ditampilkan di legenda
-  const items = [
-    {label:"Aspal", key:"ASPAL"},
-    {label:"Beton", key:"BETON"},
-    {label:"Paving", key:"PAVING"},
-    {label:"Kerikil", key:"KERIKIL"},
-    {label:"Batu", key:"BATU"},
-    {label:"Tanah", key:"TANAH"},
-    {label:"Lainnya", key:"LAINNYA"}
-  ];
-
-  items.forEach(it=>{
-    const color = (it.key === "LAINNYA") ? "#2563eb" : warnaKondisi(it.key);
-    div.innerHTML += `<i style="background:${color}"></i> ${it.label}<br>`;
-  });
+  div.innerHTML += `<i style="background:${warnaKondisi("TANAH")}"></i> Tanah<br>`;
+  div.innerHTML += `<i style="background:${warnaKondisi("TANAH DAN SEMEN")}"></i> Tanah dan Semen<br>`;
 
   return div;
 };
